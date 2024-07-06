@@ -48,10 +48,11 @@ def load_checkpoint(model, weights):
 
 
 def setup_device(gpus):
+    print(gpus)
     if gpus == '-1':  # CPU
         device = torch.device('cpu')
     else:
-        device_ids = list(map(int, gpus.split(',')))
+        device_ids = list(map(int, gpus))
         if len(device_ids) == 1:
             # Single GPU
             device = torch.device(f'cuda:{device_ids[0]}' if torch.cuda.is_available() else 'cpu')

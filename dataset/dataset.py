@@ -15,6 +15,21 @@ import random
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+def loadpathslist(root,flag):
+    classes =  os.listdir(root)
+    paths = []
+    if not '1_fake' in classes:
+        for class_name in classes:
+            imgpaths = os.listdir(root+'/'+class_name +'/'+flag+'/')
+            for imgpath in imgpaths:
+                paths.append(root+'/'+class_name +'/'+flag+'/'+imgpath)
+        return paths
+    else:
+        imgpaths = os.listdir(root+'/'+flag+'/')
+        for imgpath in imgpaths:
+            paths.append(root+'/'+flag+'/'+imgpath)
+        return paths
+
 
 def png2jpg(img, quality):
     out = BytesIO()
@@ -49,13 +64,17 @@ def get_list(path, must_contain='', exts=["png", "jpg", "JPEG", "jpeg", "bmp"]):
 class SyntheticImagesDataset(Dataset):
     def __init__(self, data_paths, opt, process_fn):    
 
-        self.jpeg_quality = opt.jpegQuality
-        self.gaussian_sigma = opt.gaussianSigma
+        self.jpeg_quality = opt.jpg_qual
+        self.gaussian_sigma = opt.blur_sig
         
         self.opt = opt
         self.process_fn = process_fn
 
-        self.real_list, self.fake_list = self.read_paths(data_paths, opt.maxSample)
+        # self.real_list, self.fake_list = self.read_paths(data_paths)
+        self.real_list = loadpathslist(data_paths,'0_real')    
+        # real_label_list = [0 for _ in range(len(self.real_img_list))]
+        self.fake_list = loadpathslist(data_paths,'1_fake')
+        # fake_label_list = [1 for _ in range(len(self.fake_img_list))]
         self.total_list = self.real_list + self.fake_list
 
         # labels
@@ -124,11 +143,11 @@ class SyntheticImagesDataset(Dataset):
         label = self.labels_dict[img_path]
         img = Image.open(img_path).convert("RGB")
 
-        if self.gaussian_sigma is not None:
-            img = gaussian_blur(img, self.gaussian_sigma) 
+        # if self.gaussian_sigma is not None:
+        #     img = gaussian_blur(img, self.gaussian_sigma) 
 
-        if self.jpeg_quality is not None:
-            img = png2jpg(img, self.jpeg_quality)
+        # if self.jpeg_quality is not None:
+        #     img = png2jpg(img, self.jpeg_quality)
 
         return self.process_fn(img, self.opt, label, img_path)
 

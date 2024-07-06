@@ -11,28 +11,28 @@ class Trainer(BaseModel):
     def __init__(self, opt):
         super(Trainer, self).__init__(opt)
         self.opt = opt  
-        self.model = get_model(opt.arch)
-        torch.nn.init.normal_(self.model.fc.weight.data, 0.0, opt.init_gain)
+        self.model = get_model(opt)
+        torch.nn.init.normal_(self.model.fc2.weight.data, 0.0, opt.initGain)
 
-        if opt.fix_backbone:
-            params = []
-            for name, p in self.model.named_parameters():
-                if  name=="fc.weight" or name=="fc.bias": 
-                    params.append(p) 
-                else:
-                    p.requires_grad = False
-        else:
-            print("Your backbone is not fixed. Are you sure you want to proceed? If this is a mistake, enable the --fix_backbone command during training and rerun")
-            import time 
-            time.sleep(3)
-            params = self.model.parameters()
-
+        # if opt.fix_backbone:
+        #     params = []
+        #     for name, p in self.model.named_parameters():
+        #         if  name=="fc.weight" or name=="fc.bias": 
+        #             params.append(p) 
+        #         else:
+        #             p.requires_grad = False
+        # else:
+        #     print("Your backbone is not fixed. Are you sure you want to proceed? If this is a mistake, enable the --fix_backbone command during training and rerun")
+        #     import time 
+        #     time.sleep(3)
+        #     params = self.model.parameters()
+        params = self.model.parameters()
         
 
         if opt.optim == 'adam':
-            self.optimizer = torch.optim.AdamW(params, lr=opt.lr, betas=(opt.beta1, 0.999), weight_decay=opt.weight_decay)
+            self.optimizer = torch.optim.AdamW(params, lr=opt.lr, betas=(opt.beta1, 0.999), weight_decay=opt.weightDecay)
         elif opt.optim == 'sgd':
-            self.optimizer = torch.optim.SGD(params, lr=opt.lr, momentum=0.0, weight_decay=opt.weight_decay)
+            self.optimizer = torch.optim.SGD(params, lr=opt.lr, momentum=0.0, weight_decay=opt.weightDecay)
         else:
             raise ValueError("optim should be [adam, sgd]")
 

@@ -86,7 +86,7 @@ class EvalOptions():
         parser.add_argument('--noCrop', default=False, action='store_true')
 
         parser.add_argument('--gpus', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
-        parser.add_argument('--numThreads', default=4, type=int, help='# threads for loading data')
+        parser.add_argument('--numThreads', default=8, type=int, help='# threads for loading data')
 
         parser.add_argument('--isTrain', default=False, type=bool, help='train or test')
 
@@ -127,28 +127,32 @@ class TrainOptions():
     def initialize(self, parser):
 
         # data augmentation
-        parser.add_argument('--rzInterp', default='bilinear')
-        parser.add_argument('--blurProb', type=float, default=0.5)
-        parser.add_argument('--blurSig', default='0.0,3.0')
-        parser.add_argument('--jpgProb', type=float, default=0.5)
-        parser.add_argument('--jpgMethod', default='cv2,pil')
-        parser.add_argument('--jpgQual', default='30,100')
+        parser.add_argument('--rz_interp', default='bilinear')
+        parser.add_argument('--blur_prob', type=float, default=0.1)
+        parser.add_argument('--blur_sig', default='0.0,1.0')
+        parser.add_argument('--jpg_prob', type=float, default=0.1)
+        parser.add_argument('--jpg_method', default='cv2,pil')
+        parser.add_argument('--jpg_qual', default='70,100')
         
+        parser.add_argument('--downsamplingProb', type=float, default=0.1)
+        
+
         parser.add_argument('--realPath', default=None, help='only used if data_mode==ours: path for the list of real images, which should contain train.pickle and val.pickle')
         parser.add_argument('--fakePath', default=None, help='only used if data_mode==ours: path for the list of fake images, which should contain train.pickle and val.pickle')
+        parser.add_argument('--dataroot', default='/home/zhainaixin/hades/data/gan', help='path to images (should have subfolders trainA, trainB, valA, valB, etc)')
         parser.add_argument('--source',  default='ours', help='wang2020 or ours')
         parser.add_argument('--dataLabel', default='train', help='label to decide whether train or validation dataset')
         parser.add_argument('--weightDecay', type=float, default=0.0, help='loss weight for l2 reg')
         
-        parser.add_argument('--batchSize', type=int, default=256, help='input batch size')
+        parser.add_argument('--batch_size', type=int, default=32, help='input batch size')
         parser.add_argument('--loadSize', type=int, default=256, help='scale images to this size')
-        parser.add_argument('--cropSize', type=int, default=224, help='then crop to this size')
+        parser.add_argument('--CropSize', type=int, default=224, help='then crop to this size')
         parser.add_argument('--noFlip', action='store_true', help='if specified, do not flip the images for data augmentation')
-        parser.add_argument('--gpus', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
+        parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
 
-        parser.add_argument('--name', type=str, default='experiment_name', help='name of the experiment. It decides where to store samples and models')
-        parser.add_argument('--numThreads', default=4, type=int, help='# threads for loading data')
-        parser.add_argument('--checkpoints', type=str, default='./checkpoints', help='models are saved here')
+        parser.add_argument('--name', type=str, default='RPTC', help='name of the experiment. It decides where to store samples and models')
+        parser.add_argument('--numThreads', default=8, type=int, help='# threads for loading data')
+        parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='models are saved here')
 
         parser.add_argument('--serialBatches', action='store_true', help='if true, takes images in order to make batches, otherwise takes them randomly')
         parser.add_argument('--initType', type=str, default='normal', help='network initialization [normal|xavier|kaiming|orthogonal]')
@@ -158,17 +162,24 @@ class TrainOptions():
         parser.add_argument('--earlystopEpoch', type=int, default=5)
         parser.add_argument('--dataAug', action='store_true', help='if specified, perform additional data augmentation (photometric, blurring, jpegging)')
         parser.add_argument('--optim', type=str, default='adam', help='optim to use [sgd, adam]')
-        parser.add_argument('--lossFreq', type=int, default=400, help='frequency of showing loss on tensorboard')
-        parser.add_argument('--saveEpochFreq', type=int, default=1, help='frequency of saving checkpoints at the end of epochs')
-        parser.add_argument('--epochCount', type=int, default=1, help='the starting epoch count, we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>, ...')
+        parser.add_argument('--loss_freq', type=int, default=400, help='frequency of showing loss on tensorboard')
+        parser.add_argument('--save_epoch_freq', type=int, default=1, help='frequency of saving checkpoints at the end of epochs')
+        parser.add_argument('--epoch_count', type=int, default=1, help='the starting epoch count, we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>, ...')
         parser.add_argument('--last_epoch', type=int, default=-1, help='starting epoch count for scheduler intialization')
-        parser.add_argument('--trainSplit', type=str, default='train', help='train, val, test, etc')
-        parser.add_argument('--valSplit', type=str, default='val', help='train, val, test, etc')
+        parser.add_argument('--train_split', type=str, default='gan_train', help='train, val, test, etc')
+        parser.add_argument('--val_split', type=str, default='gan_val', help='train, val, test, etc')
         parser.add_argument('--niter', type=int, default=100, help='total epoches')
         parser.add_argument('--beta1', type=float, default=0.9, help='momentum term of adam')
-        parser.add_argument('--lr', type=float, default=0.0001, help='initial learning rate for adam')
+        parser.add_argument('--lr', type=float, default=0.001, help='initial learning rate for adam')
 
         parser.add_argument('--isTrain', default=True, type=bool, help='train or test')
+        parser.add_argument('--isVal', default=False, type=bool, help='train or test')
+        parser.add_argument('--modelName', default="RPTC", type=str, help="model name")
+
+        # RPTC
+        parser.add_argument('--patchNum', type=int, default=3)
+        parser.add_argument('--save_latest_freq', type=int, default=2000, help='frequency of saving the latest results')
+
 
         self.initialized = True
 
@@ -212,7 +223,7 @@ class TrainOptions():
     def parse(self, print_options=True):
 
         opt = self.gather_options()
-        opt.isTrain = self.isTrain   # train or test
+        # opt.isTrain = self.isTrain   # train or test
 
         # process opt.suffix
         if opt.suffix:

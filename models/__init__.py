@@ -27,7 +27,7 @@ def get_model(opt):
     model_name = opt.modelName
     assert model_name in VALID_MODELS
     
-    device = setup_device(opt.gpus)
+    device = setup_device(opt.gpu_ids)
     print('Model: ', opt.modelName)
     print("Device: ", device)
 
@@ -119,7 +119,7 @@ def get_model(opt):
             proj_dim = 1024
         model = RineModel(backbone=("ViT-L/14", 1024), nproj=nproj, proj_dim=proj_dim)
 
-    model.load_weights(ckpt=opt.ckpt)
+    # model.load_weights(ckpt=opt.ckpt)
     model.eval()
     model = model.to(device)
 

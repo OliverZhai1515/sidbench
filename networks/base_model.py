@@ -13,7 +13,7 @@ class BaseModel(nn.Module):
         self.device = torch.device('cuda:{}'.format(opt.gpu_ids[0])) if opt.gpu_ids else torch.device('cpu')
 
     def save_networks(self, save_filename):
-        save_path = os.path.join(self.save_dir, save_filename)
+        save_path = os.path.join(self.save_dir, f"rptc_{str(save_filename)}.pth")
         torch.save(self.model.state_dict(), save_path)
 
 
